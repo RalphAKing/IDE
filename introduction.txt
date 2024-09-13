@@ -1,0 +1,5 @@
+Thank you for using RKing Editor, the lighweight editor for all.
+
+Use settings menu to customize layout and features
+
+Terminal is at the bottom it starts as hidden just drag it up.

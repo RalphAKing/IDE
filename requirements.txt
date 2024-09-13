@@ -1,0 +1,6 @@
+PyQt5
+PyQtWebEngine
+pyyaml
+pyinstaller
+QScintilla
+pywin32

@@ -1,0 +1,15 @@
+backgroundcolor: '#d3d3d3'
+caret_fg_color: '#d3d3d3'
+compile_shortcut: Ctrl+F
+current_line: '#A9A9A9'
+curserwidth: 2
+fileexplorerbacgroundcolor: '#D3D3D3'
+font_size: 10
+linenumbersbackground: '#4f0889'
+linenumberstextbackground: '#E5E4E2'
+mainbacgroundcolor: '#D3D3D3'
+open_settings: Ctrl+Q
+run_shortcut: Ctrl+R
+save_shortcut: Ctrl+S
+scrollbarbackgorund: '#E5E4E2'
+terminal_type: cmd
