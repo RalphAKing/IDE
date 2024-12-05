@@ -1,2 +1,1 @@
-# IDE
-a lightweight ide coded in py
+An IDE coded in python with basic featuerses
