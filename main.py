@@ -276,7 +276,7 @@ class TerminalWidget(QWidget):
     def __init__(self, file_path, command=None, parent=None):
         super().__init__(parent)
         self.file_path = file_path
-        self.command = command or ["python", file_path]  # Default command to run
+        self.command = command or ["python", file_path] 
         self.terminal_type = terminal_type
         self.process = QProcess(self)
         self.process.setProcessChannelMode(QProcess.MergedChannels)
@@ -295,11 +295,9 @@ class TerminalWidget(QWidget):
         self.setup_terminal()
 
     def setup_terminal(self):
-        # Extract the directory from the file_path
         working_directory = QFileInfo(self.file_path).absolutePath()
         print(working_directory)
-        self.process.setWorkingDirectory(working_directory)  # Set the working directory
-
+        self.process.setWorkingDirectory(working_directory) 
         if self.terminal_type == 'cmd':
             self.process.start("cmd.exe", ['/c'] + self.command)
         elif self.terminal_type == 'powershell':
@@ -334,8 +332,6 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-
-        # Create a file tree view on the left side
         self.file_tree = FileTreeView()
         self.file_model = QFileSystemModel()
         self.file_model.setRootPath(os.path.dirname(os.path.realpath(__file__)) + "/projects")
@@ -345,45 +341,37 @@ class MainWindow(QMainWindow):
         self.file_tree.setSortingEnabled(True)
         self.file_tree.setHeaderHidden(True)
 
-        # Connect the file tree click event to open the file
         self.file_tree.clicked.connect(self.on_file_tree_clicked)
 
-        # Tab widget for multiple open files
         self.file_tabs = QTabWidget()
         self.file_tabs.setTabsClosable(True)
         self.file_tabs.tabCloseRequested.connect(self.close_file_tab)
 
-        # Tab widget for terminals
         self.terminal_tabs = QTabWidget()
         self.terminal_tabs.setTabsClosable(True)
         self.terminal_tabs.tabCloseRequested.connect(self.close_terminal_tab)
 
-        # Create a splitter to separate file tree and the central area
         self.splitter1 = QSplitter(Qt.Horizontal)
         self.splitter1.addWidget(self.file_tabs)
         self.splitter1.addWidget(self.file_tree)
         self.splitter1.setStretchFactor(0, 8)
         self.splitter1.setStretchFactor(1, 2) 
 
-        # Create a main layout for the terminal area and file editor
         self.splitter2 = QSplitter(Qt.Vertical)
         self.splitter2.addWidget(self.splitter1)
         self.splitter2.addWidget(self.terminal_tabs)
-        self.splitter2.setStretchFactor(0, 4)  # Main content
-        self.splitter2.setStretchFactor(1, 1)  # Terminals
+        self.splitter2.setStretchFactor(0, 4)  
+        self.splitter2.setStretchFactor(1, 1)  
 
-        # Create a central widget and set the layout
         central_widget = QWidget()
         central_widget.setLayout(QVBoxLayout())
         central_widget.layout().addWidget(self.splitter2)
         
         self.setCentralWidget(central_widget)
 
-        # Create a toolbar for the run button and add it to the title bar
         self.toolbar = QToolBar("Main Toolbar")
         self.addToolBar(Qt.TopToolBarArea, self.toolbar)
 
-        # Create and add the run button to the toolbar
         self.run_button = QPushButton('Run')
         self.run_button.clicked.connect(self.run_current_file)
         self.toolbar.addWidget(self.run_button)
@@ -391,28 +379,17 @@ class MainWindow(QMainWindow):
         self.compile_button = QPushButton('Compile')
         self.compile_button.clicked.connect(self.compile_current_file)
         self.toolbar.addWidget(self.compile_button)
-
-       # Load keybindings
         self.save_shortcut = QShortcut(QKeySequence(save_shortcut_keybind), self)
         self.save_shortcut.activated.connect(self.save_current_tab)
-
         self.run_shortcut = QShortcut(QKeySequence(run_shortcut_keybind), self)
         self.run_shortcut.activated.connect(self.run_current_file)
-
         self.compile_shortcut = QShortcut(QKeySequence(compile_shortcut_keybind), self)
         self.compile_shortcut.activated.connect(self.compile_current_file)
-
         self.open_settings_menu = QShortcut(QKeySequence(open_settings_menu_keybind), self)
         self.open_settings_menu.activated.connect(self.open_settings)
-
         self.setStyleSheet(f"background-color: {mainbacgroundcolor};")
-
         self.setWindowTitle("RKing Editor")
-
-
         self.resize(int(GetSystemMetrics(0)//1.3), int(GetSystemMetrics(1)//1.3))
-
-        # Open the default file at startup
         self.open_default_file()
         settings_action = QAction("Settings", self)
         settings_action.triggered.connect(self.open_settings)
@@ -423,45 +400,33 @@ class MainWindow(QMainWindow):
         dialog.exec_()
 
     def open_default_file(self):
-        # Define the path to the default file
         default_file_path = os.path.dirname(os.path.realpath(__file__)) + "/introduction.txt"
         if QFileInfo(default_file_path).exists():
             self.open_file_in_tab(default_file_path)
 
     def on_file_tree_clicked(self, index: QModelIndex):
-        # Get the file path from the model
         file_path = self.file_model.filePath(index)
-        
-        # Check if the clicked item is a file
         if not self.file_model.isDir(index):
             self.open_file_in_tab(file_path)
 
     def open_file_in_tab(self, file_path):
-        # Extract just the file name from the path
         file_name = QFileInfo(file_path).fileName()
-
-        # Check if the file is already open in a tab
         for i in range(self.file_tabs.count()):
             if self.file_tabs.tabText(i).startswith(file_name):
                 self.file_tabs.setCurrentIndex(i)
                 return
-
-        # Create a new editor for the file
         try:
             editor = CodeEditor(file_path)
             editor.load_file(file_path)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Cannot display file format: {str(e)}")
             return
-
-        # Add the new editor to a new tab with just the file name
         self.file_tabs.addTab(editor, file_name)
         self.file_tabs.setCurrentWidget(editor)
 
     def close_file_tab(self, index):
         tab_widget = self.file_tabs.widget(index)
         if isinstance(tab_widget, CodeEditor) and tab_widget.is_modified:
-            # Ask user if they want to save changes
             response = QMessageBox.question(
                 self, 'Unsaved Changes', 
                 'The file has unsaved changes. Do you want to save them?',
@@ -469,14 +434,13 @@ class MainWindow(QMainWindow):
             )
             if response == QMessageBox.Yes:
                 if not tab_widget.save_file():
-                    return  # Abort closing if saving fails
+                    return 
             elif response == QMessageBox.Cancel:
-                return  # Abort closing if user cancels
+                return 
 
         self.file_tabs.removeTab(index)
 
     def save_current_tab(self):
-        # Get the current widget (CodeEditor) in the tab
         current_widget = self.file_tabs.currentWidget()
         if isinstance(current_widget, CodeEditor):
             current_widget.save_file()
@@ -504,7 +468,7 @@ class MainWindow(QMainWindow):
         if isinstance(terminal_widget, TerminalWidget):
             terminal_widget.close_terminal()
         elif isinstance(terminal_widget, HTMLViewerWidget):
-            terminal_widget.close_viewer()  # Close the HTML viewer if necessary
+            terminal_widget.close_viewer() 
         self.terminal_tabs.removeTab(index)
 
     def compile_current_file(self):
@@ -513,34 +477,22 @@ class MainWindow(QMainWindow):
             file_path = current_widget.file_path
             if file_path.endswith('py') or file_path.endswith('python'):
                 if QFileInfo(file_path).exists():
-                    # Determine the directory of the file
                     working_directory = QFileInfo(file_path).absolutePath()
-                    # Create a new terminal widget
-                    
                     terminal_widget = TerminalWidget(file_path, command=['python', '-m', 'PyInstaller', file_path])
                     terminal_widget.process.setWorkingDirectory(working_directory)
-                    # Add the terminal widget as a new tab
                     self.terminal_tabs.addTab(terminal_widget, f"Compile {QFileInfo(file_path).fileName()}")
                     self.terminal_tabs.setCurrentWidget(terminal_widget)
-
-
-
-
 
 class FileTreeView(QTreeView):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
-        
-        # Initialize the actions
         self.create_file_action = QAction("Create File", self)
         self.create_folder_action = QAction("Create Folder", self)
         self.rename_action = QAction("Rename", self)
         self.delete_action = QAction("Delete", self)
         self.create_project_action = QAction("Create Project", self)
-
-        # Connect actions to slots
         self.create_file_action.triggered.connect(self.create_file)
         self.create_folder_action.triggered.connect(self.create_folder)
         self.rename_action.triggered.connect(self.rename_item)
@@ -553,22 +505,16 @@ class FileTreeView(QTreeView):
         index = self.indexAt(pos)
         self.menu = QMenu(self)
         if index.isValid():
-            # Item is clicked
             if self.model().isDir(index):
-                # Right-clicked on a folder
-                self.menu.addAction(self.create_file_action)  # Option to create a file
-                self.menu.addAction(self.create_folder_action)  # Option to create a folder
-                self.menu.addAction(self.rename_action)  # Option to rename
-                self.menu.addAction(self.delete_action)  # Option to delete
+                self.menu.addAction(self.create_file_action) 
+                self.menu.addAction(self.create_folder_action)  
+                self.menu.addAction(self.rename_action)
+                self.menu.addAction(self.delete_action) 
             else:
-                # Right-clicked on a file
-                self.menu.addAction(self.rename_action)  # Option to rename
-                self.menu.addAction(self.delete_action)  # Option to delete
+                self.menu.addAction(self.rename_action)  
+                self.menu.addAction(self.delete_action)  
         else:
-            # Right-clicked on empty space
-            self.menu.addAction(self.create_project_action)  # Option to create a project
-
-        # Show the context menu
+            self.menu.addAction(self.create_project_action) 
         self.menu.exec_(self.viewport().mapToGlobal(pos))
 
     def create_file(self):
@@ -615,10 +561,10 @@ class FileTreeView(QTreeView):
             )
             if reply == QMessageBox.Yes:
                 if QFileInfo(file_path).isDir():
-                    if self.remove_directory(file_path):  # Recursively remove the directory
+                    if self.remove_directory(file_path): 
                         self.refresh_model()
                 else:
-                    if QFile(file_path).remove():  # Remove the file
+                    if QFile(file_path).remove():
                         self.refresh_model()
 
     def remove_directory(self, dir_path):
@@ -626,26 +572,24 @@ class FileTreeView(QTreeView):
         if not dir.exists():
             return False
 
-        # Recursively delete all contents
         for entry in dir.entryList(QDir.AllEntries | QDir.NoDotAndDotDot):
             entry_path = dir.filePath(entry)
             if QDir(entry_path).exists():
-                if not self.remove_directory(entry_path):  # Recursive call for subdirectories
+                if not self.remove_directory(entry_path): 
                     return False
             else:
                 if not QFile(entry_path).remove():
                     return False
 
-        return dir.rmdir(dir_path)  # Finally, remove the directory itself
+        return dir.rmdir(dir_path)
 
     def refresh_model(self):
-        # Refresh the model by resetting the root path
         root_path = self.model().rootPath()
         self.model().setRootPath('')
         self.model().setRootPath(root_path)
 
     def create_project(self):
-        path = self.model().rootPath()  # Or any other default directory you want
+        path = self.model().rootPath()  
         project_name, _ = QInputDialog.getText(self, "Create Project", "Project name:")
         if project_name:
             project_path = QDir(path).filePath(project_name)
