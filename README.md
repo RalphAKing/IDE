@@ -98,7 +98,7 @@ This project is open-source and available for modification and use under the MIT
 ```
 MIT License
 
-Copyright (c) 2024 Ralph King
+Copyright (c) 2024-2025 Ralph King
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
